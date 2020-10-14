@@ -1,5 +1,5 @@
 # xcorr
-Scripts for computing cross-correlations for Simons Observatory
+Scripts for computing cross-correlations for Simons Observatory CMB lensing with galaxy clustering and lensing.
 
 ## Requirements:
 
