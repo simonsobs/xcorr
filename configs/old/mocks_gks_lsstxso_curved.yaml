@@ -1,0 +1,42 @@
+# CAREFUL: yaml is super sensitive to spaces - don't use tabs
+# The generated maps are not convolved with any window function or mask,
+# this will be done when measuring the power spectra
+# Assumes that all maps are either scalar (spin=0) or tensor (spin=2)
+# The probes should be ordered such that the spin 0 fields are first,
+# followed by the spin 2 fields
+# # Assumes that all B-modes of all spin 2 fields are zero
+
+
+# Input needed to generate sims and compute Cl
+mode: 'curved'
+path2outputdir: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved'
+nrealiz: 1 #100 #2
+probes: ['g', 'k', 's']
+spins: [0, 0, 2]
+pixWindow: [0, 0]
+nside: 256
+lmax: 9000 # should be a fraction of  
+nProc: 1
+
+path2cls: ['/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_gg.txt', '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_gk.txt', 
+'/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_gs.txt', 
+'/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_kk.txt', '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_ks.txt', 
+'/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_ss.txt']
+
+# If no noise wanted, comment out the line below
+path2noisecls: ['/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt', '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt', 
+'/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_ss.txt']
+
+
+# Input needed only to measure the power spectra of the mocks,
+# not to generate the mocks
+lMinCl: 10   # lowest edge of bandpower bins
+lMaxCl: 700 #3000 #3000   # highest edge of bandpower bins
+nBinsCl: 20 # number of bandpower bins
+binSpacing: 'lin' # 'log'
+binWeighting: 'numModes'  # 'uniform'
+lMaxMap: 700 #6000  # maximum multipole to include in coupling matrix
+
+doTheory: False
+doCov: False
+plot: False

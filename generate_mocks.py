@@ -225,7 +225,7 @@ def read_cl(params):
          cls[iFieldPair,:] = clFieldsMat[iField, jField, :]
          iFieldPair += 1
 
-   print(cls)
+   #print(cls)
 
 
    return cls
@@ -411,4 +411,47 @@ if __name__ == '__main__':
    with sharedmem.MapReduce(np=nProc) as pool:
       f = lambda iRea:  generate_map(params, clArray, iRea)
       pool.map(f, range(nRea))
+
+
+def run(pathConfig):
+
+   # read parameters from yaml file
+   logger.info('Read config from {}.'.format(pathConfig))
+   config = yaml.load(open(pathConfig))
+   # add inferred parameters from yaml file
+   params = enrich_params(config)
+
+   # create output directory if needed
+   if not os.path.isdir(config['path2outputdir']):
+      os.makedirs(config['path2outputdir'])
+
+   # Only curved (healpix) maps for now
+   if config['mode'] <> 'curved':
+      raise NotImplementedError()
+
+   # Only implemented noise free maps for now
+   if config['path2noisecls'] is not None:
+      logger.info('Generating noisy mocks.')
+   else:
+      logger.info('Generating noise-free mocks.')
+
+
+   # read the input theory cl
+   # modify to add the noise power spectrum to the autos
+   clArray = read_cl(params)
+
+   # Number of processes to run on
+   if config['nProc'] is None:
+      nProc = 1
+   else:
+      nProc = config['nProc']
+   logger.info('Running on '+str(nProc)+' processes')
+
+   # generate and save all the mock maps
+   #maps = generate_map(params, clArray, 0)
+   nRea = config['nrealiz']
+   with sharedmem.MapReduce(np=nProc) as pool:
+      f = lambda iRea:  generate_map(params, clArray, iRea)
+      pool.map(f, range(nRea))
+
 

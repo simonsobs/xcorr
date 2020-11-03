@@ -1,0 +1,115 @@
+# CAREFUL: yaml is super sensitive to spaces - don't use tabs
+# The generated maps are not convolved with any window function or mask,
+# this will be done when measuring the power spectra
+# Assumes that all maps are either scalar (spin=0) or tensor (spin=2)
+# The probes should be ordered such that the spin 0 fields are first,
+# followed by the spin 2 fields
+# # Assumes that all B-modes of all spin 2 fields are zero
+
+
+# Input needed to generate sims and compute Cl
+#mode: 'curved'
+pathOutputDir: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved'
+#nrealiz: 100 #2
+#probes: ['g', 'kcmb', 'shear']
+#spins: [0, 0, 2]
+#nside: 1024
+#lmax: 9000 # should be a fraction of  
+
+# If no noise wanted, comment out the line below
+#pathNoiseClTheory: ['/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt', '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt', 
+#'/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_ss.txt']
+
+
+
+
+
+# Input needed to compute Cl
+mode: 'curved'
+lMinCl: 10   # lowest edge of bandpower bins
+lMaxCl: 700 #3000 #3000   # highest edge of bandpower bins
+nBinsCl: 20 # number of bandpower bins
+binSpacing: 'lin' # 'log'
+binWeighting: 'numModes'  # uniform
+lMaxMap: 700 #6000  # maximum multipole to include in coupling matrix
+
+
+########################################################################
+# kk
+
+#nameOutputClFile: 'test0_masked_kk'  #'test0_masked_apod0'
+#
+#spins: [0, 0]
+#pixWindow: [0, 0]
+#pathMap1: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
+#pathMask1: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+#pathMap2: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
+#pathMask2: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+#
+## Theory power spectra
+#doTheory: True
+#doCov: True
+#pathCl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_kk.txt'
+#pathCl11: # only needed if map1<>map2
+#pathCl22: # only needed if map1<>map2
+## Noise spectra should all be specified, unless they are zero
+#pathNl11: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
+#pathNl22: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
+#pathNl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
+#
+## for quick tests
+#plot: True
+
+
+########################################################################
+# gg
+
+#nameOutputClFile: 'test0_masked_gg'  #'test0_masked_apod0'
+#
+#spins: [0, 0]
+#pixWindow: [0, 0]
+#pathMap1: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
+#pathMask1: '/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+#pathMap2: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
+#pathMask2: '/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+#
+## Theory power spectra
+#doTheory: True
+#doCov: True
+#pathCl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_gg.txt'
+#pathCl11: # only needed if map1<>map2
+#pathCl22: # only needed if map1<>map2
+## Noise spectra should all be specified, unless they are zero
+#pathNl11: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt'
+#pathNl22: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt'
+#pathNl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt'
+#
+## for quick tests
+#plot: True
+
+########################################################################
+# gk
+
+nameOutputClFile: 'test0_masked_gk'  #'test0_masked_apod0'
+
+spins: [0, 0]
+pixWindow: [0, 0]
+pathMap1: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
+pathMask1: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+pathMap2: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
+pathMask2: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+
+# Theory power spectra
+doTheory: True
+doCov: True
+pathCl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_gk.txt'
+pathCl11: # only needed if map1<>map2
+pathCl22: # only needed if map1<>map2
+# Noise spectra should all be specified, unless they are zero
+pathNl11: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt'
+pathNl22: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
+pathNl12: #'/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
+
+# for quick tests
+plot: True
+

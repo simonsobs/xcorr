@@ -14,6 +14,7 @@ from scipy import stats
 import matplotlib.pyplot as plt
 # Import the NaMaster python wrapper
 import pymaster as nmt
+import healpy as hp
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ parser.add_argument('--pathNl22', dest='pathNl22', type=str, required=False)
 
 
 
-def read_cl(path):
+def read_cl(path, config):
    logger.info('Reading cl from '+path)
    data = np.genfromtxt(path)
    # check that the lmax requested is in the input file
@@ -70,33 +71,33 @@ def read_all_cl(config):
    
    # Read signal power spectra
    if config['pathCl12'] is not None:
-      fCl12 = read_cl(config['pathCl12'])
+      fCl12 = read_cl(config['pathCl12'], config)
    else:
       fCl11 = lambda l: 0.
    #
    if config['pathCl11'] is not None:
-      fCl11 = read_cl(config['pathCl11'])
+      fCl11 = read_cl(config['pathCl11'], config)
    else:
       fCl11 = lambda l: 0.
    #
    if config['pathCl22'] is not None:
-      fCl22 = read_cl(config['pathCl22'])
+      fCl22 = read_cl(config['pathCl22'], config)
    else:
       fCl22 = lambda l: 0.
 
    # Read noise power spectra
    if config['pathNl12'] is not None:
-      fNl12 = read_cl(config['pathNl12'])
+      fNl12 = read_cl(config['pathNl12'], config)
    else:
       fNl12 = lambda l: 0.
    #
    if config['pathNl11'] is not None:
-      fNl11 = read_cl(config['pathNl11'])
+      fNl11 = read_cl(config['pathNl11'], config)
    else:
       fNl11 = lambda l: 0.
    #
    if config['pathNl22'] is not None:
-      fNl22 = read_cl(config['pathNl22'])
+      fNl22 = read_cl(config['pathNl22'], config)
    else:
       fnl22 = lambda l: 0.
 
@@ -223,9 +224,9 @@ def compute(config):
       
 
       # choose the maximum multipole in map to compute coupling matrix
-      lMaxMap = min(3.*nSide-1, config['lMaxMap'])
+      lMaxMap = min(3*nSide-1, config['lMaxMap'])
       # Generate the ell bins
-      #ells = np.arange(config['lMaxCl']+1)
+      ellsFull = np.arange(3*nSide-1+1)
       ells = np.arange(lMaxMap+1)
       weights = np.zeros_like(ells, dtype='float64')
       bpws = -1*np.ones_like(ells)
@@ -239,7 +240,7 @@ def compute(config):
 
       b = nmt.NmtBin(nSide, bpws=bpws, ells=ells, weights=weights, lmax=lMaxMap)
       # The effective sampling rate for these bandpowers can be obtained calling:
-      ells_decoupled = b.get_effective_ells()
+      ell_bins = b.get_effective_ells()
 
       # Only spins 0 for now
       if spin1<>0 or spin2<>0:
@@ -274,13 +275,14 @@ def compute(config):
       # Compute pseudo-Cls
       logger.info('Computing (coupled) pseudo-cls')
       cl_coupled = nmt.compute_coupled_cell(f1, f2)
+
       # Uncoupling pseudo-Cls
       # For one spin-0 field and one spin-2 field, NaMaster gives: n_cls=2, [C_TE,C_TB]
       # For two spin-2 fields, NaMaster gives: n_cls=4, [C_E1E2,C_E1B2,C_E2B1,C_B1B2]
       logger.info('Decoupling cls.')
       cl_decoupled = wsp.decouple_cell(cl_coupled)
       # array of measured cl to be saved to file
-      cl_out = np.vstack((ells_decoupled, cl_decoupled))
+      cl_out = np.vstack((ell_bins, cl_decoupled))
       # Save measured cl to file
       path = pathOutputDir + "/" + config['nameOutputClFile'] + "_measuredcl.txt"
       np.savetxt(path, cl_out.T)
@@ -299,7 +301,7 @@ def compute(config):
          # couple with the mask, bin, then decouple
          clTheory_decoupled = wsp.decouple_cell(wsp.couple_cell(clTheory))
          # array of measured cl to be saved to file
-         clTheory_out = np.vstack((ells_decoupled, clTheory_decoupled))
+         clTheory_out = np.vstack((ell_bins, clTheory_decoupled))
          # save it to file
          path = pathOutputDir + "/" + config['nameOutputClFile'] + "_theorycl.txt"
          np.savetxt(path, clTheory_out.T)
@@ -334,34 +336,69 @@ def compute(config):
    # plot to check if requested
    if config['plot']:# and config['doTheory'] and config['doCov']:
 
+      # to check the raw measured power spectrum
+      clHp = hp.anafast(map1, map2) 
 
       fig=plt.figure(0)
       ax=fig.add_subplot(111)
       #
-
-      ax.errorbar(ells_decoupled, cl_decoupled[0], yerr=np.sqrt(np.diag(cov)), c='b', label=r'measured, decoupled')
-      ax.errorbar(ells_decoupled, -cl_decoupled[0], yerr=np.sqrt(np.diag(cov)), c='r')
-      ax.plot(ells_decoupled, clTheory_decoupled[0], '.', label=r'theory, binned & decoupled')
-      ax.plot(ells, fClTheory(ells), label=r'theory')
+      ax.plot(np.arange(len(clHp)), clHp, label=r'measured (coupled, healpy)')
+      ax.plot(ellsFull, cl_coupled[0], '--', label=r'measured (coupled, namaster)')
+      ax.plot(ellsFull, fClTheory(ellsFull), label=r'raw theory')
       #
-      ax.set_yscale('log', nonposy='clip')
       ax.legend(loc=1)
-      ax.set_xlabel(r'$\ell$')
-      ax.set_ylabel(r'$c_\ell$')
+      ax.set_xscale('log', nonposx='clip')
+      ax.set_xlim((100., lMaxMap))
+
+      plt.show()
 
 
       fig=plt.figure(1)
       ax=fig.add_subplot(111)
       #
-      ax.errorbar(ells_decoupled, cl_decoupled[0]/clTheory_decoupled[0] -1., yerr=np.sqrt(np.diag(cov))/clTheory_decoupled[0], c='b')
+      ax.plot(ells, fClTheory(ells), label=r'raw theory')
+      ax.errorbar(ell_bins, cl_decoupled[0], yerr=np.sqrt(np.diag(cov)), c='b', label=r'measured, decoupled')
+      ax.errorbar(ell_bins, -cl_decoupled[0], yerr=np.sqrt(np.diag(cov)), c='b', fmt='--')
+      ax.plot(ell_bins, clTheory_decoupled[0], '.', label=r'theory, binned & decoupled')
+      #
+      ax.set_yscale('log', nonposy='clip')
+      #ax.set_xscale('log', nonposx='clip')
+      ax.set_xlim((100., lMaxMap))
+      ax.legend(loc=2)
+      ax.set_xlabel(r'$\ell$', fontsize=18)
+      ax.set_ylabel(r'$C_\ell^{\rm decoupled}$', fontsize=18)
+
+
+      fig=plt.figure(2)
+      ax=fig.add_subplot(111)
+      #
+      ax.errorbar(ell_bins, cl_decoupled[0]/clTheory_decoupled[0] -1., yerr=np.sqrt(np.diag(cov))/clTheory_decoupled[0], c='b')
       ax.axhline(0., color='k')
       #
-      ax.set_xlabel(r'$\ell$')
-      #ax.set_ylabel(r'$c_\ell^\text{measured} / c_\ell^\text{th binned} - 1$')
+      ax.set_xlim((100., lMaxMap))
+      ax.set_xlabel(r'$\ell$', fontsize=18)
+      ax.set_ylabel(r'$c_\ell^{\rm measured \ decoupled} / c_\ell^{\rm th} - 1$', fontsize=18)
 
       plt.show()
 
 
+      fig=plt.figure(3)
+      ax=fig.add_subplot(111)
+      #
+
+      #
+      X, Y = np.meshgrid(lEdges, lEdges, indexing='ij')
+
+      s = np.sqrt(np.diag(cov))
+      cor = np.array([[cov[i1, i2] / (s[i1]*s[i2]) for i2 in range(len(ell_bins))] for i1 in range(len(ell_bins))])
+      cp=ax.pcolormesh(X, Y, cor, cmap='YlOrRd', vmin=0., vmax=1.)
+      #
+      plt.colorbar(cp)
+      ax.set_aspect('equal')
+      ax.set_xlabel(r'$ell$')
+      ax.set_ylabel(r'$ell$')
+      
+      plt.show()
 
 
 
@@ -380,6 +417,17 @@ if __name__ == '__main__':
       if config.has_key(key) and argDict[key] is not None:
          config[key] = argDict[key] 
 
+   # do all the calculations
+   compute(config)
+
+
+
+def run(path2config):
+   '''To run from a python script
+   '''
+   # read parameters from yaml file
+   config = yaml.load(open(path2config))
+   logger.info('Read config from {}.'.format(path2config))
    # do all the calculations
    compute(config)
 

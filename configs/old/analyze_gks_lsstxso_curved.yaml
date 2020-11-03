@@ -95,9 +95,9 @@ nameOutputClFile: 'test0_masked_gk'  #'test0_masked_apod0'
 spins: [0, 0]
 pixWindow: [0, 0]
 pathMap1: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
-pathMask1: '/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+pathMask1: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
 pathMap2: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
-pathMask2: '/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+pathMask2: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
 
 # Theory power spectra
 doTheory: True
