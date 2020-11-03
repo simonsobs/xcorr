@@ -343,12 +343,12 @@ def compute(config):
       ax=fig.add_subplot(111)
       #
       ax.plot(np.arange(len(clHp)), clHp, label=r'measured (coupled, healpy)')
-      ax.plot(ellsFull, cl_coupled[0], '--', label=r'measured (coupled, namaster)')
+      #ax.plot(ellsFull, cl_coupled[0], '--', label=r'measured (coupled, namaster)')
       ax.plot(ellsFull, fClTheory(ellsFull), label=r'raw theory')
       #
       ax.legend(loc=1)
       ax.set_xscale('log', nonposx='clip')
-      ax.set_xlim((100., lMaxMap))
+      #ax.set_xlim((100., lMaxMap))
 
       plt.show()
 
@@ -363,7 +363,7 @@ def compute(config):
       #
       ax.set_yscale('log', nonposy='clip')
       #ax.set_xscale('log', nonposx='clip')
-      ax.set_xlim((100., lMaxMap))
+      #ax.set_xlim((100., lMaxMap))
       ax.legend(loc=2)
       ax.set_xlabel(r'$\ell$', fontsize=18)
       ax.set_ylabel(r'$C_\ell^{\rm decoupled}$', fontsize=18)
@@ -375,7 +375,7 @@ def compute(config):
       ax.errorbar(ell_bins, cl_decoupled[0]/clTheory_decoupled[0] -1., yerr=np.sqrt(np.diag(cov))/clTheory_decoupled[0], c='b')
       ax.axhline(0., color='k')
       #
-      ax.set_xlim((100., lMaxMap))
+      #ax.set_xlim((100., lMaxMap))
       ax.set_xlabel(r'$\ell$', fontsize=18)
       ax.set_ylabel(r'$c_\ell^{\rm measured \ decoupled} / c_\ell^{\rm th} - 1$', fontsize=18)
 
@@ -385,10 +385,7 @@ def compute(config):
       fig=plt.figure(3)
       ax=fig.add_subplot(111)
       #
-
-      #
       X, Y = np.meshgrid(lEdges, lEdges, indexing='ij')
-
       s = np.sqrt(np.diag(cov))
       cor = np.array([[cov[i1, i2] / (s[i1]*s[i2]) for i2 in range(len(ell_bins))] for i1 in range(len(ell_bins))])
       cp=ax.pcolormesh(X, Y, cor, cmap='YlOrRd', vmin=0., vmax=1.)

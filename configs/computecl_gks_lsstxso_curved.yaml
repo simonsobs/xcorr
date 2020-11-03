@@ -9,7 +9,7 @@
 
 # Input needed to generate sims and compute Cl
 #mode: 'curved'
-pathOutputDir: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved'
+pathOutputDir: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/output/mocks/mocks_gks_lsstxso_curved'
 #nrealiz: 100 #2
 #probes: ['g', 'kcmb', 'shear']
 #spins: [0, 0, 2]
@@ -17,8 +17,8 @@ pathOutputDir: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gk
 #lmax: 9000 # should be a fraction of  
 
 # If no noise wanted, comment out the line below
-#pathNoiseClTheory: ['/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt', '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt', 
-#'/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_ss.txt']
+#pathNoiseClTheory: ['/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_gg.txt', '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_kk.txt', 
+#'/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_ss.txt']
 
 
 
@@ -41,21 +41,21 @@ lMaxMap: 700 #6000  # maximum multipole to include in coupling matrix
 #
 #spins: [0, 0]
 #pixWindow: [0, 0]
-#pathMap1: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
+#pathMap1: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/output/mocks/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
 #pathMask1: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
-#pathMap2: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
+#pathMap2: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/output/mocks/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
 #pathMask2: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
 #
 ## Theory power spectra
 #doTheory: True
 #doCov: True
-#pathCl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_kk.txt'
+#pathCl12: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_kk.txt'
 #pathCl11: # only needed if map1<>map2
 #pathCl22: # only needed if map1<>map2
 ## Noise spectra should all be specified, unless they are zero
-#pathNl11: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
-#pathNl22: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
-#pathNl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
+#pathNl11: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_kk.txt'
+#pathNl22: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_kk.txt'
+#pathNl12: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_kk.txt'
 #
 ## for quick tests
 #plot: True
@@ -68,21 +68,21 @@ lMaxMap: 700 #6000  # maximum multipole to include in coupling matrix
 #
 #spins: [0, 0]
 #pixWindow: [0, 0]
-#pathMap1: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
+#pathMap1: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/output/mocks/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
 #pathMask1: '/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
-#pathMap2: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
+#pathMap2: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/output/mocks/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
 #pathMask2: '/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
 #
 ## Theory power spectra
 #doTheory: True
 #doCov: True
-#pathCl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_gg.txt'
+#pathCl12: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_gg.txt'
 #pathCl11: # only needed if map1<>map2
 #pathCl22: # only needed if map1<>map2
 ## Noise spectra should all be specified, unless they are zero
-#pathNl11: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt'
-#pathNl22: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt'
-#pathNl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt'
+#pathNl11: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_gg.txt'
+#pathNl22: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_gg.txt'
+#pathNl12: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_gg.txt'
 #
 ## for quick tests
 #plot: True
@@ -94,22 +94,28 @@ nameOutputClFile: 'test0_masked_gk'  #'test0_masked_apod0'
 
 spins: [0, 0]
 pixWindow: [0, 0]
-pathMap1: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
-pathMask1: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
-pathMap2: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/sims_grf/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
-pathMask2: #'/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+pathMap1: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/output/mocks/mocks_gks_lsstxso_curved/g_nside256_lmax9000_curved_rea0.fits'
+pathMask1: '/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
+pathMap2: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/output/mocks/mocks_gks_lsstxso_curved/k_nside256_lmax9000_curved_rea0.fits'
+pathMask2: '/global/cscratch1/sd/sferraro/SOxpipe/masks/mask_LSST_SO_40pc_nside1024.fits'
 
 # Theory power spectra
 doTheory: True
 doCov: True
-pathCl12: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/cl_gk.txt'
-pathCl11: # only needed if map1<>map2
-pathCl22: # only needed if map1<>map2
+pathCl12: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_gk.txt'
+pathCl11: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_gg.txt'
+pathCl22: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_kk.txt'
 # Noise spectra should all be specified, unless they are zero
-pathNl11: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_gg.txt'
-pathNl22: '/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
-pathNl12: #'/global/cscratch1/sd/sferraro/SOxpipe/input_cl/ncl_kk.txt'
+pathNl11: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_gg.txt'
+pathNl22: '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_kk.txt'
+pathNl12: #'/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_kk.txt'
 
 # for quick tests
 plot: True
+
+
+path2cls: ['/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_gg.txt', '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_gk.txt', '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_gs.txt', '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_kk.txt', '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_ks.txt', '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/cl_ss.txt']
+
+# If no noise wanted, comment out the line below
+path2noisecls: ['/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_gg.txt', '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_kk.txt', '/global/cscratch1/sd/eschaan/so_l32/pipeline/xcorr/input/cl_theory/ncl_ss.txt']
 

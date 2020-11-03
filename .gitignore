@@ -1,5 +1,6 @@
 *.pyc
 *.swp
 notebooks/.ipynb_checkpoints/
+output/
 *.out
 ./core
