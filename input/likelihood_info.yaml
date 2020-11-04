@@ -1,0 +1,110 @@
+!!python/object/apply:collections.OrderedDict
+- - - params
+    - !!python/object/apply:collections.OrderedDict
+      - - - H0
+          - 70.0
+        - - ombh2
+          - 0.024499999999999997
+        - - tau
+          - 0.05
+        - - mnu
+          - 0.0
+        - - nnu
+          - 3.046
+        - - num_massive_neutrinos
+          - 0
+        - - ns
+          - 0.965
+        - - SN
+          - 1.0e-07
+        - - logA
+          - !!python/object/apply:collections.OrderedDict
+            - - - prior
+                - !!python/object/apply:collections.OrderedDict
+                  - - - min
+                      - 1.0
+                    - - max
+                      - 4.0
+              - - ref
+                - 3.05
+              - - proposal
+                - 0.1
+              - - latex
+                - \log(10^{10} A_\mathrm{s})
+              - - drop
+                - true
+        - - As
+          - !!python/object/apply:collections.OrderedDict
+            - - - value
+                - 'lambda logA: 1e-10*np.exp(logA)'
+              - - latex
+                - A_\mathrm{s}
+        - - Omegam
+          - !!python/object/apply:collections.OrderedDict
+            - - - prior
+                - !!python/object/apply:collections.OrderedDict
+                  - - - min
+                      - 0.1
+                    - - max
+                      - 0.9
+              - - ref
+                - 0.3
+              - - proposal
+                - 0.01
+              - - latex
+                - \Omega_m
+              - - drop
+                - true
+        - - b1
+          - !!python/object/apply:collections.OrderedDict
+            - - - prior
+                - !!python/object/apply:collections.OrderedDict
+                  - - - min
+                      - 0.0
+                    - - max
+                      - 10.0
+              - - ref
+                - 1.0
+              - - proposal
+                - 0.1
+              - - latex
+                - b1
+  - - likelihood
+    - clkg_likelihood:
+        external: import_module('settings').clkg_likelihood
+        speed: 125.0
+  - - theory
+    - camb:
+        extra_args:
+          AccuracyBoost: 1.0
+          WantCls: false
+          WantTransfer: true
+          Want_CMB: false
+          Want_CMB_lensing: false
+          Want_cl_2D_array: false
+          bbn_predictor: PArthENoPE_880.2_standard.dat
+          halofit_version: mead
+          lAccuracyBoost: 1.0
+          lSampleBoost: 1.0
+          lens_potential_accuracy: 1
+          redshifts:
+          - 0.0
+        speed: 4.5
+        stop_at_error: true
+  - - sampler
+    - !!python/object/apply:collections.OrderedDict
+      - - - minimize
+          - confidence_for_unbounded: 0.9999995
+            ignore_prior: false
+            max_evals: 1000000.0
+            method: scipy
+            override_scipy:
+              method: Nelder-Mead
+  - - modules
+    - /global/cfs/cdirs/m3058/krolewski/cosmo_modules/
+  - - output
+    - chains/analytic_test_minimize
+  - - timing
+    - true
+  - - resume
+    - true

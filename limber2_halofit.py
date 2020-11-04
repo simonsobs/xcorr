@@ -96,8 +96,6 @@ def setup_chi(cosmo, dndz1, dndz2, Nchi, Nchi_mag):
 	zmax     = np.max(np.append(dndz1[:,0],dndz2[:,0]))
 	zval     = np.linspace(zmin,zmax,1000) # Accuracy doesn't depend much on the number of zbins
 	chival   = cosmo.comoving_distance(zval).value*hub	# In Mpc/h.
-	zval = np.loadtxt('zval.txt')
-	chival = np.loadtxt('chival.txt')
 	zatchi   = Spline(chival,zval)
 	# Spline comoving distance as well to make it faster
 	chiatz   = Spline(zval, chival)

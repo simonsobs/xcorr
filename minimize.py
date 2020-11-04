@@ -3,6 +3,15 @@ from cobaya.run import run
 import numpy as np
 from settings import *
 
+info['params']['omch2'] = "lambda H0,ombh2,tau,mnu,nnu,num_massive_neutrinos,ns,SN,As,Omegam,b1: Omegam * (H0/100.)**2. - ombh2 - (mnu/93.14)"
+info['params']['sigma8'] = {'derived': True, 'latex': r'\sigma_8'}
+
+from mpi4py import MPI
+
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+
+
 # Set up log file
 
 logfile = output_name + '_minimize.log'
@@ -33,6 +42,8 @@ class Logger(object):
         pass    
 
 sys.stdout = Logger()
+
+info['sampler'] = {'minimize':  minimize_block}
 
 np.random.seed(123+rank)
 products = run(info)

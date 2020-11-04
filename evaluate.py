@@ -2,6 +2,16 @@ from cobaya.model import get_model
 from cobaya.run import run
 import numpy as np
 from settings import *
+import yaml
+
+info['params']['omch2'] = "lambda H0,ombh2,tau,mnu,nnu,num_massive_neutrinos,ns,SN,As,Omegam,b1: Omegam * (H0/100.)**2. - ombh2 - (mnu/93.14)"
+info['params']['sigma8'] = {'derived': True, 'latex': r'\sigma_8'}
+
+from mpi4py import MPI
+
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+
 
 # Set up log file
 
@@ -37,12 +47,19 @@ np.random.seed(123+rank)
 #products = run(info)
 
 info['sampler'] = 'evaluate'
+params_yaml = yaml.load(open('input/params.yaml','r'))
+#info['params'] = params_yaml
+print(info['params'])
 
 import time
 
 # Need to get the likelihood first
 model = get_model(info)
 
+logA_for_test = 3.05
+Omegam_for_test = 0.3
+b1_for_test = 1.0
+
 t0 = time.time()
-like = model.loglike({'logA': 2.984, 'Omegam': 0.3180, 'logSN': -6.7467, 'b1': 2.2475, 'shift': -0.0256, 'width': 0.9471, 's_wise': 0.6505,'alpha_cross': 0.0, 'alpha_auto': 0.0})
+like = model.loglike({'logA': logA_for_test, 'Omegam': Omegam_for_test, 'b1': b1_for_test})
 print(time.time()-t0)

@@ -2,13 +2,14 @@ import time
 from cachetools import cached
 from cachetools.keys import hashkey
 import numpy as np
-from mpi4py import MPI
+#from mpi4py import MPI
 import matplotlib.pyplot as plt
 import os
 import copy
 import functools
 from scipy.interpolate import InterpolatedUnivariateSpline
 import sys
+import yaml
 
 # This works with the version of Cobaya from github on March 20, 2020
 # the development version fixes a couple bugs w/r/t 2.0.3 and is preferred!
@@ -20,18 +21,24 @@ from getdist.mcsamples import loadMCSamples
 import getdist.plots as gdplt
 
 import limber2_halofit as L2
-import limber2_cleft as L2_cleft
 
 # velocileptors dependency. cleft = False turns it off
 cleft = False
 if cleft:
+	import limber2_cleft as L2_cleft
 	from LPT.cleft_fftw import CLEFT
+	
+# Turn off dn/dz uncertainty
+dndz_uncertainty = False
+
+# Turn off k^2 dependent bias terms (multiplying Halofit)
+alphas = False
 
 # Define your cobaya modules path
 modules_path = '/global/cfs/cdirs/m3058/krolewski/cosmo_modules/'
 
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
+#comm = MPI.COMM_WORLD
+#rank = comm.Get_rank()
 
 ################################ SETTINGS ##############################################
 
@@ -47,18 +54,17 @@ bin_width = 50
 low_ind_gg = int(low_ell_gg/bin_width)
 low_ind_kg = int(low_ell_kg/bin_width)
 high_ind = int(high_ell/bin_width)
-print(low_ind_gg,low_ind_kg,high_ind)
 
 # Cross and auto data
-data_cross = np.loadtxt('/global/cscratch1/sd/akrolew/unwise-hod/8192-5000/HOD16/QA_Cl/GREEN/noisy_cl/HOD16_namaster_kg.txt')
-data_auto = np.loadtxt('/global/cscratch1/sd/akrolew/unwise-hod/8192-5000/HOD16/QA_Cl/GREEN/noisy_cl/HOD16_namaster_gg.txt')
+data_cross = np.loadtxt('input/clkg.txt')
+data_auto = np.loadtxt('input/clgg.txt')
 
 # Redshift distributions. For WISE we consider both "xcorr" dn/dz == b1(z) * dN/dz, and "xmatch" dn/dz == dn/dz
-dndz_xcorr = np.loadtxt('/global/cfs/cdirs/m3058/krolewski/cosmology/green_bsml_dndz_finer_bins_HOD16.txt')
-dndz_xmatch = np.loadtxt('/global/cfs/cdirs/m3058/krolewski/cosmology/green_dndz_HOD16.txt')
+dndz_xcorr = np.loadtxt('input/dndz.txt')
+dndz_xmatch = np.loadtxt('input/dndz.txt')
 
 # Magnification bias
-s_wise = 0.653
+s_wise = 0.4
 # Euleian bias for Halofit for the magnification-bias term
 b1_HF = 2.172
 
@@ -84,23 +90,26 @@ jn = 5
 var = 'delta_nonu'
 
 # Output name
-output_name = 'chains/cleft/green_full_cosmo_bsml_dndz_halofit_magbias_FIXED2_crowcanyon_uncertain_dndz_better_oversample_dl50_full_sky_finer_bins_velocileptors_halofit_plus_higher_bias_HOD16_alphas_v5_TEST'
+output_name = 'chains/analytic_test'
 
 # fsky
 fsky_cov = 0.589848876565425
 
 # b1-b2-bs priors (digitized from Abidi et al. 2018)
-abidi = np.loadtxt('Abidi_all_bias.csv',delimiter=',')
 
-# Eulerian b1(z) prior. Used to define the higher-order bias terms.
-redshift = [0, 0.05, 0.25, 0.4, 0.55, 0.75, 1.00, 1.25, 1.4, 1.50, 1.75, 2.00, 2.15]
-bsml = [0.91, 1.20, 1.25, 1.34, 1.41, 1.43, 1.87, 2.40, 2.79, 2.98, 3.95, 5.36, 5.85]
+if cleft:
+	abidi = np.loadtxt('Abidi_all_bias.csv',delimiter=',')
 
-# k^2 dependent bias evolution. Defined as -alpha/2 k^2 P_mm, with separate
-# alphas for the galaxy autocorrelation and galaxy-matter cross-correlation
-redshift_for_alpha = np.array([0.00, 0.55, 1.00, 1.25, 1.50, 2.00, 2.50])
-alpha_auto_for_alpha = np.array([0.00, 0.00, -22.22, -38.67, -78.88, 8.88, -33.33])
-alpha_cross_for_alpha = np.array([0.00, 0.00,-9.55,-10.44,-18.77,-43.33,-11.11])
+	# Eulerian b1(z) prior. Used to define the higher-order bias terms.
+	redshift = [0, 0.05, 0.25, 0.4, 0.55, 0.75, 1.00, 1.25, 1.4, 1.50, 1.75, 2.00, 2.15]
+	bsml = [0.91, 1.20, 1.25, 1.34, 1.41, 1.43, 1.87, 2.40, 2.79, 2.98, 3.95, 5.36, 5.85]
+
+if alphas:
+	# k^2 dependent bias evolution. Defined as -alpha/2 k^2 P_mm, with separate
+	# alphas for the galaxy autocorrelation and galaxy-matter cross-correlation
+	redshift_for_alpha = np.array([0.00, 0.55, 1.00, 1.25, 1.50, 2.00, 2.50])
+	alpha_auto_for_alpha = np.array([0.00, 0.00, -22.22, -38.67, -78.88, 8.88, -33.33])
+	alpha_cross_for_alpha = np.array([0.00, 0.00,-9.55,-10.44,-18.77,-43.33,-11.11])
 
 
 ################################ PRIORS ##############################################
@@ -172,11 +181,15 @@ nnu = 3.046
 num_massive_neutrinos = 0
 ns = 0.96824
 
+# Fiducial cosmology for higher bias terms
+Omegam_for_higher_bias = 0.3092
+As_fo_higher_bias = 2.102e-9
+
 # Specify ell range
 all_ell = np.linspace(0,high_ell,int(high_ell+1))	
 
 # Planck noise on Clkk (for covariance)
-planck_noise = np.loadtxt('/global/homes/s/sferraro/maps/unWISE/PLANCK_LENSING/COM_Lensing_4096_R3.00/MV/nlkk.dat')[:,1]
+planck_noise = np.loadtxt('input/nlkk.dat')[:,1]
 
 # Get data
 bp_cross = data_cross[1,low_ind_kg:high_ind]
@@ -215,33 +228,34 @@ if cleft:
 	pk = powerspec[:,1]
 	zelda =  CLEFT(k, pk, one_loop=one_loop, third_order=False, shear=shear, threads=1, N=N, cutoff=cutoff, jn=jn, import_wisdom=True)
 
-# Load b1-b2-bs priors (digitized from Abidi et al. 2018)
-b1_abidi = abidi[:,1]
-b2_abidi = abidi[:,2]
-bs_abidi = abidi[:,3]
+if cleft:
+	# Load b1-b2-bs priors (digitized from Abidi et al. 2018)
+	b1_abidi = abidi[:,1]
+	b2_abidi = abidi[:,2]
+	bs_abidi = abidi[:,3]
 
-b2_spl = InterpolatedUnivariateSpline(b1_abidi,b2_abidi)
-b2_spl_const = InterpolatedUnivariateSpline(b1_abidi,b2_abidi,ext='const')
+	b2_spl = InterpolatedUnivariateSpline(b1_abidi,b2_abidi)
+	b2_spl_const = InterpolatedUnivariateSpline(b1_abidi,b2_abidi,ext='const')
 
-def b2_spl_correct(b1_in):
-    b2_out = np.zeros_like(b1_in)
-    b2_out[b1_in < b1_abidi[0]] = b2_spl_const(b1_in[b1_in < b1_abidi[0]])
-    b2_out[b1_in >= b1_abidi[0]] = b2_spl(b1_in[b1_in >= b1_abidi[0]])
-    return b2_out
+	def b2_spl_correct(b1_in):
+		b2_out = np.zeros_like(b1_in)
+		b2_out[b1_in < b1_abidi[0]] = b2_spl_const(b1_in[b1_in < b1_abidi[0]])
+		b2_out[b1_in >= b1_abidi[0]] = b2_spl(b1_in[b1_in >= b1_abidi[0]])
+		return b2_out
 
-bs_spl = InterpolatedUnivariateSpline(b1_abidi,bs_abidi)
-bs_spl_const = InterpolatedUnivariateSpline(b1_abidi,bs_abidi,ext='const')
+	bs_spl = InterpolatedUnivariateSpline(b1_abidi,bs_abidi)
+	bs_spl_const = InterpolatedUnivariateSpline(b1_abidi,bs_abidi,ext='const')
 
 
-def bs_spl_correct(b1_in):
-    bs_out = np.zeros_like(b1_in)
-    bs_out[b1_in < b1_abidi[0]] = bs_spl_const(b1_in[b1_in < b1_abidi[0]])
-    bs_out[b1_in >= b1_abidi[0]] = bs_spl(b1_in[b1_in >= b1_abidi[0]])
-    return bs_out
-    
-def bsml_fn(z):
-	bsml_spl = InterpolatedUnivariateSpline(redshift,bsml)
-	return bsml_spl(z)
+	def bs_spl_correct(b1_in):
+		bs_out = np.zeros_like(b1_in)
+		bs_out[b1_in < b1_abidi[0]] = bs_spl_const(b1_in[b1_in < b1_abidi[0]])
+		bs_out[b1_in >= b1_abidi[0]] = bs_spl(b1_in[b1_in >= b1_abidi[0]])
+		return bs_out
+	
+	def bsml_fn(z):
+		bsml_spl = InterpolatedUnivariateSpline(redshift,bsml)
+		return bsml_spl(z)
 
 
 ################################ FUNCTIONS ##############################################
@@ -432,8 +446,12 @@ def wrap_limber(Pk_interpolator, halofit, s_wise, As, H0, omch2, ombh2, mnu, nnu
 	setup_chi_out = L2.setup_chi(cosmo, dndz_xcorr_modified, dndz_xmatch_modified, Nchi, Nchi_mag)
 	
 	# Define alpha_cross(z) and alpha_auto(z) for k^2-dependent bias terms.
-	alpha_cross  = lambda z: np.interp(z, redshift_for_alpha, alpha_cross_for_alpha)
-	alpha_auto = lambda z: np.interp(z, redshift_for_alpha, alpha_auto_for_alpha)
+	if alphas:
+		alpha_cross  = lambda z: np.interp(z, redshift_for_alpha, alpha_cross_for_alpha)
+		alpha_auto = lambda z: np.interp(z, redshift_for_alpha, alpha_auto_for_alpha)
+	else:
+		alpha_cross = lambda z: 1.0
+		alpha_auto = lambda z: 1.0
 	
 	out = L2.do_limber(all_ell, cosmo, dndz_xcorr_modified, dndz_xcorr_modified, s_wise, s_wise, halofit_pk, b1_HF, b1_HF, alpha_auto, alpha_cross, Nchi=Nchi, autoCMB=autoCMB, use_zeff=False, dndz1_mag=dndz_xmatch, dndz2_mag=dndz_xmatch,setup_chi_flag=True,setup_chi_out=setup_chi_out)	
 		
@@ -499,17 +517,22 @@ def get_angular_power_spectra(halofit,_theory,
 
 	# Multiply by bias	
 	lim_clkg, alpha_cross_term, lim_clkmu = cross
-	lim_cross  = b1* lim_clkg + lim_clkmu + alpha_cross * alpha_cross_term
-	
+	if alphas:
+		lim_cross  = b1* lim_clkg + lim_clkmu + alpha_cross * alpha_cross_term
+	else:
+		lim_cross = b1* lim_clkg + lim_clkmu
 
 	# Multiply by bias
 	lim_clgg, alpha_auto_term, lim_clgmu, lim_clmumu = auto
-	lim_auto = b1**2 * lim_clgg + 2*b1*lim_clgmu + lim_clmumu + alpha_auto * alpha_auto_term
+	if alphas:
+		lim_auto = b1**2 * lim_clgg + 2*b1*lim_clgmu + lim_clmumu + alpha_auto * alpha_auto_term
+	else:
+		lim_auto = b1**2 * lim_clgg + 2*b1*lim_clgmu + lim_clmumu
 	
 	if cleft:	
 		# Fix the cosmology for the b2 and shear bias terms
-		auto_xcorr, cross_xcorr, auto_xmatch, cross_xmatch, auto_mixed = wrap_limber_cleft(Pk_interpolator, halofit, 0.4, 2.102e-9, H0,
-			0.3092*(H0/100.)**2-ombh2, ombh2, mnu,
+		auto_xcorr, cross_xcorr, auto_xmatch, cross_xmatch, auto_mixed = wrap_limber_cleft(Pk_interpolator, halofit, 0.4, As_for_higher_bias, H0,
+			Omegam_for_higher_bias*(H0/100.)**2-ombh2, ombh2, mnu,
 			nnu, ns, tau,
 			num_massive_neutrinos, 0.0, 1.0, autoCMB)
 
@@ -550,38 +573,38 @@ def covariance(model, like_dict):
 		var1=var,var2=var).P
 		
 	cross, auto = get_angular_power_spectra(halofit,model.likelihood.theory,
-		like_dict['s_wise'],
+		s_wise,
 		like_dict['Omegam'],
 		like_dict['b1'],
 		1.0,
 		1.0,
-		like_dict['alpha_auto'],
-		like_dict['alpha_cross'],
 		0,
-		10**like_dict['logSN'],
-		like_dict['shift'],
-		like_dict['width'])
+		0,
+		0,
+		like_dict['SN'],
+		0,
+		1)
 
 	lim_clkk, _ = get_angular_power_spectra(halofit,model.likelihood.theory,
-		like_dict['s_wise'],
+		s_wise,
 		like_dict['Omegam'],
 		like_dict['b1'],
 		1.0,
 		1.0,
-		like_dict['alpha_auto'],
-		like_dict['alpha_cross'],
 		0,
-		10**like_dict['logSN'],
-		like_dict['shift'],
-		like_dict['width'],
+		0,
+		0,
+		like_dict['SN'],
+		0,
+		1,
 		autoCMB=True)
 
 
-	clkg_cov_diag = (cross**2. + (auto + 10**like_dict['logSN']) * (lim_clkk + planck_noise[:high_ell+1]))/(fsky_cov * (2*all_ell + 1.))
+	clkg_cov_diag = (cross**2. + (auto + like_dict['SN']) * (lim_clkk + planck_noise[:high_ell+1]))/(fsky_cov * (2*all_ell + 1.))
 	
-	clgg_cov_diag = (2 * (auto + 10**like_dict['logSN']) ** 2.)/(fsky_cov * (2*all_ell + 1.))
+	clgg_cov_diag = (2 * (auto + like_dict['SN']) ** 2.)/(fsky_cov * (2*all_ell + 1.))
 	
-	clkg_clgg_cross_cov_diag = (2 * (auto + 10**like_dict['logSN']) * cross)/(fsky_cov * (2*all_ell + 1.))
+	clkg_clgg_cross_cov_diag = (2 * (auto + like_dict['SN']) * cross)/(fsky_cov * (2*all_ell + 1.))
 		
 	upper = np.concatenate((np.zeros((high_ell - low_ell_gg, low_ell_gg-low_ell_kg)),
 		np.diag(clkg_clgg_cross_cov_diag[low_ell_gg:high_ell])), axis=1)
@@ -642,6 +665,9 @@ def clkg_likelihood(s_wise=0.4,
 	# Make log-likelihood
 	loglike_clgg = -0.5 * np.sum((bp_auto-lim_bin_auto)**2./bp_auto_err**2.)
 	
+	print('bp_auto',bp_auto)
+	print('lim_bin_auto',lim_bin_auto)
+	
 			
 	delta = np.concatenate((bp_cross - lim_bin_cross,bp_auto - lim_bin_auto),axis=0)
 	
@@ -652,7 +678,28 @@ def clkg_likelihood(s_wise=0.4,
 	return loglike
 
 ################################ INFO ##############################################
-	
+
+likelihood_block = {'clkg_likelihood': {'external': "import_module('settings').clkg_likelihood", 'speed': 125.}}
+theory_block = {'camb': {'stop_at_error': True, 'speed': 4.5, 
+       'extra_args':
+        {'redshifts': [0.],
+        'halofit_version': 'mead',
+         'WantTransfer': True,
+         'WantCls': False,
+         'Want_CMB': False,
+         'Want_cl_2D_array': False,
+         'Want_CMB_lensing': False,
+         'AccuracyBoost': 1.0,
+         'lAccuracyBoost': 1.0,
+         'lSampleBoost': 1.0,
+        'bbn_predictor': 'PArthENoPE_880.2_standard.dat',
+        'lens_potential_accuracy': 1}}}
+minimize_block =  {'method': 'scipy',
+        'ignore_prior': False,
+        'override_scipy': {'method': 'Nelder-Mead'},
+        'max_evals': 1e6,
+        'confidence_for_unbounded': 0.9999995}
+        	
 info = {
     'params': {
         # Fixed
@@ -665,7 +712,7 @@ info = {
          #Sampled
         'logA': {
            'prior': {'min': logA_min, 'max': logA_max},
-           'ref': np.log(1e10*As),
+           'ref': 3.05,
            'proposal': logA_ref_sigma,
                'latex': '\log(10^{10} A_\mathrm{s})',
                'drop': True},
@@ -679,9 +726,9 @@ info = {
             'drop': True},
         'logSN': {
            'prior': {'dist': 'norm',
-              'loc': np.log10(SN),
+              'loc': -7.,
               'scale': logSN_prior_sigma},
-              'ref': np.log10(SN),
+              'ref': -7.,
               'proposal': logSN_ref_sigma,
               'drop': True},
         'SN': {'value': 'lambda logSN: 10**logSN',
@@ -708,10 +755,10 @@ info = {
         's_wise': {
             'prior': {'dist': 'norm',
             'loc': s_wise,
-            'scale': 0.1*s_wise},
+            'scale': 0.05},
             'ref': s_wise,
             'latex': r's',
-            'proposal': 0.1*s_wise},
+            'proposal': 0.05},
         #'alpha_cross': {
         #    'prior': {'min': -10000.0, 'max': 10000.0},
         #    'ref': alpha_cross,
@@ -763,33 +810,21 @@ info = {
         #    'proposal': alpha_matter_ref_sigma},
         #'bs': "lambda ombh2,H0,tau,mnu,nnu,num_massive_neutrinos,ns,As,Omegam,SN,b1,alpha_cross,alpha_auto,alpha_matter: -2./7. * b1",
         #'b2': "lambda ombh2,H0,tau,mnu,nnu,num_massive_neutrinos,ns,As,Omegam,SN,b1,alpha_cross: ((b1 * 1.686 + 1)**2. - 3 * (b1 * 1.686 + 1))/1.686**2.",
-        'omch2': "lambda ombh2,H0,tau,mnu,nnu,num_massive_neutrinos,ns,As,Omegam,logSN,b1,alpha_cross: Omegam * (H0/100.)**2. - ombh2 - (mnu/93.14)",
-        'sigma8': {'derived': True, 'latex': r'\sigma_8'}},
-    'likelihood': {'clkg_likelihood': {'external': clkg_likelihood, 'speed': 125.}},
-    'theory': {'camb': {'stop_at_error': True, 'speed': 4.5, 
-       'extra_args':
-        {'redshifts': [0.],
-        'halofit_version': 'mead',
-         'WantTransfer': True,
-         'WantCls': False,
-         'Want_CMB': False,
-         'Want_cl_2D_array': False,
-         'Want_CMB_lensing': False,
-         'AccuracyBoost': 1.0,
-         'lAccuracyBoost': 1.0,
-         'lSampleBoost': 1.0,
-        'bbn_predictor': 'PArthENoPE_880.2_standard.dat',
-        'lens_potential_accuracy': 1}}},
+        },
+    'likelihood': likelihood_block,
+    'theory': theory_block,
     'sampler': {'minimize': 
-        {'method': 'scipy',
-        'ignore_prior': False,
-        'override_scipy': {'method': 'Nelder-Mead'},
-        'max_evals': 1e6,
-        'confidence_for_unbounded': 0.9999995}},
+        minimize_block},
     'modules': modules_path,
     'output': output_name + '_minimize',
     'timing': True,
     'resume': True}
+    
+
+if not os.path.exists('input/likelihood_info.yaml'):
+	yaml.dump(info, open('input/likelihood_info.yaml','w'))
+
+info = yaml.load(open('input/likelihood_info.yaml','r'))
 
 # Activate timing (we will use it later)
 #info['timing'] = True
@@ -800,12 +835,13 @@ info = {
 
 #info['prior'] = {'b2_abidi': lambda b1, b2: -(b2 - b2_spl_correct(b1))**2./b2_prior_sigma**2.}
 #			'bs_abidi': lambda b1, bs: -(bs - bs_spl_correct(b1))**2./sigma_bs**2.}
-shift_width_covariance = np.array([[0.00120118, 0.00210338],
-       [0.00210338, 0.00513655]])
-       
-def chisq(shift,width):
-	arr = np.array([shift,width-1.0])
-	chisq = np.dot(arr.T, np.dot(np.linalg.inv(shift_width_covariance),arr))
-	return chisq
+if dndz_uncertainty:
+	shift_width_covariance = np.array([[0.00120118, 0.00210338],
+		   [0.00210338, 0.00513655]])
+	   
+	def chisq(shift,width):
+		arr = np.array([shift,width-1.0])
+		chisq = np.dot(arr.T, np.dot(np.linalg.inv(shift_width_covariance),arr))
+		return chisq
 
-info['prior'] = {'shift_width': lambda shift, width: -0.5 * chisq(shift,width)}
+	info['prior'] = {'shift_width': lambda shift, width: -0.5 * chisq(shift,width)}
