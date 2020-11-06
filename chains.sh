@@ -1,7 +1,7 @@
 #! /bin/bash
 
-#SBATCH -J minimize
-#SBATCH -N 1
+#SBATCH -J chains
+#SBATCH -N 4
 #SBATCH -C haswell
 #SBATCH -A m3404
 #SBATCH -o logs/%x.o%j
@@ -11,4 +11,4 @@
 #SBATCH --mail-type=ALL
 
 export PATH=/global/homes/a/akrolew/miniconda3/bin:$PATH
-srun -N 1 -n 1 python minimize.py
+srun -N 4 -n 8 python chains.py

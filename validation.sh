@@ -1,6 +1,6 @@
 #! /bin/bash
 
-#SBATCH -J minimize
+#SBATCH -J validation
 #SBATCH -N 1
 #SBATCH -C haswell
 #SBATCH -A m3404
@@ -11,4 +11,4 @@
 #SBATCH --mail-type=ALL
 
 export PATH=/global/homes/a/akrolew/miniconda3/bin:$PATH
-srun -N 1 -n 1 python minimize.py
+srun -N 1 -n 1 python validation.py

@@ -85,16 +85,16 @@ lim_cross, lim_auto = get_angular_power_spectra(halofit,
 	model.likelihood.theory,
 	s_wise,
 	Omegam_for_test, b1_for_test, 0,
-	0,0,0,0, 0,0, 0)
+	0,0,0,0, 0,0, 1)
 	
 lim_bin_cross = bin(all_ell,lim_cross,lmin[:high_ind],lmax[:high_ind])
 # Correct for namaster binning
 #lim_bin_cross = lim_bin #* clkg_corr[low_ind:high_ind]
 
-lim_bin_auto = bin(all_ell,lim_auto,lmin[:high_ind],lmax[:high_ind])
+#print('lim_auto immediately before bin',lim_auto)
 
-print('lim_bin_auto',lim_bin_auto)
-print('SN',info['params']['SN'])
+lim_bin_auto = bin(all_ell,lim_auto,lmin[:high_ind],lmax[:high_ind]) + info['params']['SN']
+
 
 #+info['params']['SN']
 
@@ -103,5 +103,5 @@ np.savetxt('input/clgg_unbinned.txt',lim_auto + info['params']['SN'])
 
 cl_input = np.loadtxt('/global/cscratch1/sd/akrolew/unwise-hod/8192-5000/HOD16/QA_Cl/GREEN/clkg_binned_dl50_noiseless_for_chains.txt')
 
-np.savetxt('input/clgg.txt',np.array([cl_input[0,:high_ind],lim_bin_auto,0.1*lim_bin_auto]))
-np.savetxt('input/clkg.txt',np.array([cl_input[0,:high_ind],lim_bin_cross,0.1*lim_bin_cross]))
+np.savetxt('input/clgg.txt',np.array([cl_input[0,:high_ind],lim_bin_auto + np.random.normal(loc=0,scale=0.1 * lim_bin_auto),0.1*lim_bin_auto]))
+np.savetxt('input/clkg.txt',np.array([cl_input[0,:high_ind],lim_bin_cross + np.random.normal(loc=0,scale=0.1 * lim_bin_cross),0.1*lim_bin_cross]))

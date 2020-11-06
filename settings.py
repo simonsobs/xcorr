@@ -513,7 +513,7 @@ def get_angular_power_spectra(halofit,_theory,
 		_theory.get_param('omch2'), _theory.get_param('ombh2'), _theory.get_param('mnu'),
 		_theory.get_param('nnu'), _theory.get_param('ns'), _theory.get_param('tau'),
 		_theory.get_param('num_massive_neutrinos'), shift, width, autoCMB)
-
+		
 
 	# Multiply by bias	
 	lim_clkg, alpha_cross_term, lim_clkmu = cross
@@ -581,7 +581,7 @@ def covariance(model, like_dict):
 		0,
 		0,
 		0,
-		like_dict['SN'],
+		info['params']['SN'],
 		0,
 		1)
 
@@ -594,17 +594,17 @@ def covariance(model, like_dict):
 		0,
 		0,
 		0,
-		like_dict['SN'],
+		info['params']['SN'],
 		0,
 		1,
 		autoCMB=True)
 
 
-	clkg_cov_diag = (cross**2. + (auto + like_dict['SN']) * (lim_clkk + planck_noise[:high_ell+1]))/(fsky_cov * (2*all_ell + 1.))
+	clkg_cov_diag = (cross**2. + (auto + info['params']['SN']) * (lim_clkk + planck_noise[:high_ell+1]))/(fsky_cov * (2*all_ell + 1.))
 	
-	clgg_cov_diag = (2 * (auto + like_dict['SN']) ** 2.)/(fsky_cov * (2*all_ell + 1.))
+	clgg_cov_diag = (2 * (auto + info['params']['SN']) ** 2.)/(fsky_cov * (2*all_ell + 1.))
 	
-	clkg_clgg_cross_cov_diag = (2 * (auto + like_dict['SN']) * cross)/(fsky_cov * (2*all_ell + 1.))
+	clkg_clgg_cross_cov_diag = (2 * (auto + info['params']['SN']) * cross)/(fsky_cov * (2*all_ell + 1.))
 		
 	upper = np.concatenate((np.zeros((high_ell - low_ell_gg, low_ell_gg-low_ell_kg)),
 		np.diag(clkg_clgg_cross_cov_diag[low_ell_gg:high_ell])), axis=1)
@@ -649,7 +649,8 @@ def clkg_likelihood(s_wise=0.4,
 
 	lim_cross, lim_auto = get_angular_power_spectra(halofit, _theory, s_wise, Omegam, b1, b2, bs, alpha_auto, alpha_cross, alpha_matter, SN, shift, width)
 
-	
+	#print('lim_auto immediately before bin',lim_auto)
+
 	# Bin
 	lim_bin = bin(all_ell,lim_cross,lmin[low_ind_kg:high_ind],lmax[low_ind_kg:high_ind]) + SN_cross
 	# Correct for namaster binning
@@ -664,10 +665,7 @@ def clkg_likelihood(s_wise=0.4,
 	lim_bin_auto = lim_bin #* clgg_corr[low_ind:high_ind]
 	# Make log-likelihood
 	loglike_clgg = -0.5 * np.sum((bp_auto-lim_bin_auto)**2./bp_auto_err**2.)
-	
-	print('bp_auto',bp_auto)
-	print('lim_bin_auto',lim_bin_auto)
-	
+			
 			
 	delta = np.concatenate((bp_cross - lim_bin_cross,bp_auto - lim_bin_auto),axis=0)
 	

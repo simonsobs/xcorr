@@ -3,6 +3,15 @@ from cobaya.run import run
 import numpy as np
 from settings import *
 
+info['params']['omch2'] = "lambda H0,ombh2,tau,mnu,nnu,num_massive_neutrinos,ns,SN,As,Omegam,b1: Omegam * (H0/100.)**2. - ombh2 - (mnu/93.14)"
+info['params']['sigma8'] = {'derived': True, 'latex': r'\sigma_8'}
+
+from mpi4py import MPI
+
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+
+
 # Set up log file
 
 logfile = output_name + '.log'
@@ -34,11 +43,10 @@ class Logger(object):
 
 sys.stdout = Logger()
 
-sampled_params = np.array(['logA','Omegam','logSN','b1','s_wise', 'shift', 'width','alpha_cross','alpha_auto'])
+sampled_params = np.array(['logA','Omegam','b1'])
 
 minimum = np.loadtxt(output_name + '_minimize.minimum.txt')
 x = minimum[2:2+len(sampled_params)]
-x = np.array([x[0], x[1], x[2], x[3], x[4], x[7], x[8], x[5], x[6]])
 
 ################################ FISHER FOR COVMAT ##############################################
 
@@ -72,7 +80,7 @@ info['sampler'] = 'evaluate'
 
 # Need to get the likelihood first
 model = get_model(info)
-like = model.loglike({'logA': x[0], 'Omegam': x[1], 'logSN': x[2], 'b1': x[3],'s_wise':x[4], 'shift': x[5], 'width': x[6], 'alpha_cross': x[7], 'alpha_auto': x[8]})
+like = model.loglike({'logA': x[0], 'Omegam': x[1], 'b1': x[2]})
 
 
 # Compute the derivatives
@@ -126,18 +134,19 @@ for i in range(len(sampled_params)):
 
 	cross1, auto1 = get_angular_power_spectra(halofit,
 		model.likelihood.theory,
+		s_wise,
 		like_dict['Omegam'],
 		like_dict['b1'],
-		1.0,
-		1.0,
-		like_dict['alpha_auto'],
-		like_dict['alpha_cross'],
 		0.0,
-		10**like_dict['logSN'],
-		like_dict['shift'],
-		like_dict['width'])
+		0.0,
+		0,
+		0,
+		0.0,
+		info['params']['SN'],
+		0,
+		1)
 
-	auto1 += 10**like_dict['logSN']
+	auto1 += info['params']['SN']
 
 	cl1 = np.concatenate((cross1[low_ell_kg:high_ell],auto1[low_ell_gg:high_ell]),axis=0)
 
@@ -180,18 +189,19 @@ for i in range(len(sampled_params)):
 
 	cross2, auto2 = get_angular_power_spectra(halofit,
 		model.likelihood.theory,
+		s_wise,
 		like_dict['Omegam'],
 		like_dict['b1'],
-		1.0,
-		1.0,
-		like_dict['alpha_auto'],
-		like_dict['alpha_cross'],
 		0.0,
-		10**like_dict['logSN'],
-		like_dict['shift'],
-		like_dict['width'])
+		0,
+		0,
+		0.0,
+		0.0,
+		info['params']['SN'],
+		0,
+		1)
 
-	auto2 += 10**like_dict['logSN']
+	auto2 += info['params']['SN']
 
 	cl2 = np.concatenate((cross2[low_ell_kg:high_ell],auto2[low_ell_gg:high_ell]),axis=0)
 
@@ -235,17 +245,7 @@ for i in range(len(sampled_params)):
 
 
 
-shift_width_covariance = np.array([[0.00120118, 0.00210338],
-       [0.00210338, 0.00513655]])
-
-
-prior_dndz = np.zeros_like(fisher)
-shift_ind = np.where(sampled_params=='shift')[0][0]
-print(sampled_params)
-width_ind = np.where(sampled_params=='width')[0][0]
-prior_dndz[shift_ind:width_ind+1, shift_ind:width_ind+1] = np.linalg.inv(shift_width_covariance)
-
-fisher_tot = fisher + prior_dndz #+ prior_alpha
+fisher_tot = fisher
 print(np.shape(fisher_tot))
 print(len(sampled_params))
 
@@ -257,8 +257,8 @@ cov = np.linalg.inv(fisher_tot)
 
 #cov[7,7] = 1./0.1**2.
 #cov[8,8] = 1./0.1**2.
-#np.savetxt(output_name + '.covmat',cov)
-cov = np.loadtxt(output_name + '.covmat')
+np.savetxt(output_name + '.covmat',cov)
+#cov = np.loadtxt(output_name + '.covmat')
 
 ################################ CHAINS ##############################################
 
@@ -287,32 +287,23 @@ def wrap_clkg_likelihood(s_wise=0.4,
 	#print('out',out)
 	return out
 	
-sampled_params = np.array(['logA','Omegam','logSN','b1','s_wise', 'shift', 'width','alpha_cross','alpha_auto'])
+sampled_params = np.array(['logA','Omegam','b1'])
 
 
 info['likelihood']['clkg_likelihood']['external'] = wrap_clkg_likelihood
 info['sampler'] = {'mcmc': {'learn_proposal': True, 'oversample': True,'learn_proposal_Rminus1_max': 10, 'proposal_scale': 1.0, 'Rminus1_stop': 0.05, 'burn_in': '100d', 'max_tries': '100d','covmat': cov, 'covmat_params': list(sampled_params)}}
 #info['sampler'] = {'mcmc': {'learn_proposal': True, 'oversample': True, 'Rminus1_stop': 0.05, 'burn_in': '100d', 'max_tries': '100d'}}
-info['sampler']['mcmc']['blocking'] = [(1.0, ['logA','Omegam']), (2.0, ['shift','width','s_wise']), (5.0, ['logSN','b1','alpha_cross','alpha_auto'])]
+info['sampler']['mcmc']['blocking'] = [(1.0, ['logA','Omegam']),  (5.0, ['b1'])]
 
 
 np.random.seed(123+rank)
 starting_point = np.random.multivariate_normal(x,0.5*cov)
 
-starting_point[4] = 0.65
-starting_point[7] = np.random.uniform(0.9,1.1)
-starting_point[8] = np.random.uniform(0.9,1.1)
 
 print('Starting at ', starting_point)
 info['params']['logA']['ref'] =   starting_point[0]
 info['params']['Omegam']['ref'] = starting_point[1]
-info['params']['logSN']['ref'] = starting_point[2]
-info['params']['b1']['ref'] = starting_point[3]
-info['params']['s_wise']['ref'] = starting_point[4]
-info['params']['shift']['ref'] = starting_point[5]
-info['params']['width']['ref'] = starting_point[6]
-info['params']['alpha_cross']['ref'] = starting_point[7]
-info['params']['alpha_auto']['ref'] = starting_point[8]
+info['params']['b1']['ref'] = starting_point[2]
 
 
 info['output'] = output_name + ''
