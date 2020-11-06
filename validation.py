@@ -8,8 +8,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 # Notice loadMCSamples requires a *full path*
 import os
-from settings_halofit import *
+from settings import *
 from cobaya.model import get_model
+
+info['params']['omch2'] = "lambda H0,ombh2,tau,mnu,nnu,num_massive_neutrinos,ns,SN,As,Omegam,b1: Omegam * (H0/100.)**2. - ombh2 - (mnu/93.14)"
+info['params']['sigma8'] = {'derived': True, 'latex': r'\sigma_8'}
+
 
 #low_ind_gg = 1
 #low_ind_kg = 1
@@ -17,7 +21,7 @@ from cobaya.model import get_model
 name = output_name.split('/')[1]
 names = ['logA','Omegam','b1']
 
-gd_sample = loadMCSamples(os.path.abspath('chains/cleft/'+name), settings={'ignore_rows':0.5})
+gd_sample = loadMCSamples(os.path.abspath(output_name), settings={'ignore_rows':0.5})
 
 mean = gd_sample.getMeans()
 
@@ -31,13 +35,14 @@ chains = gd_sample.getParams()
 
 #chains = gd_sample.getParams()
 
-logpost = 0.5*(chains.chi2)+chains.minuslogprior
+logpost = np.loadtxt(output_name + '.1.txt')[:,1]
+logpost = logpost[int(0.5*len(logpost)):]
 
 #gd_sample.filter(np.abs(chains.b2) < 1)
 
 
 chains = gd_sample.getParams()
-logpost = 0.5*(chains.chi2)+chains.minuslogprior
+#logpost = 0.5*(chains.chi2)+chains.minuslogprior
 
 print("%12s %12s" % ('Parameter','Mean'))
 for i in range(len(names)):
@@ -130,16 +135,16 @@ halofit = model.likelihood.theory.camb.get_matter_power_interpolator(pars,
 lim_cross, lim_auto = get_angular_power_spectra(halofit,
 	model.likelihood.theory,
 	s_wise,
-	Omegam_for_test, b1_for_test, 0,
+	x[1], x[2], 0,
 	0,0,0,0, 0,0, 1)
 	
-lim_bin_cross = bin(all_ell,lim_cross,lmin[:high_ind],lmax[:high_ind])
+lim_bin_cross = bin(all_ell,lim_cross,lmin[low_ind_kg:high_ind],lmax[low_ind_kg:high_ind])
 # Correct for namaster binning
 #lim_bin_cross = lim_bin #* clkg_corr[low_ind:high_ind]
 
 #print('lim_auto immediately before bin',lim_auto)
 
-lim_bin_auto = bin(all_ell,lim_auto,lmin[:high_ind],lmax[:high_ind]) + info['params']['SN']
+lim_bin_auto = bin(all_ell,lim_auto,lmin[low_ind_gg:high_ind],lmax[low_ind_gg:high_ind]) + info['params']['SN']
 
 plt.figure()
 plt.errorbar(data_auto[0,low_ind_gg:high_ind],1e5*data_auto[1,low_ind_gg:high_ind],1e5*data_auto[2,low_ind_gg:high_ind])
@@ -156,13 +161,13 @@ plt.xlim(0,600)
 
 plt.legend(frameon=False)
 
-os.system('mkdir plots/cleft/'+name)
+os.system('mkdir plots/'+name)
 
 plt.title('Green Auto',size=25)
 plt.xlabel(r'$\ell$',size=25)
 plt.ylabel(r'$C_{\ell}^{gg}$',size=25)
 plt.tight_layout()
-plt.savefig('plots/cleft/'+name+'/clgg.png')
+plt.savefig('plots/'+name+'/clgg.png')
 
 plt.figure()
 plt.errorbar(data_cross[0,low_ind_kg:high_ind],1e5*data_cross[0,low_ind_kg:high_ind]* data_cross[1,low_ind_kg:high_ind],1e5*data_cross[0,low_ind_kg:high_ind]*data_cross[2,low_ind_kg:high_ind])
@@ -175,13 +180,13 @@ plt.xlim(0,600)
 
 plt.legend(frameon=False)
 
-os.system('mkdir plots/cleft/'+name)
+os.system('mkdir plots/'+name)
 
 plt.title('Green Cross',size=25)
 plt.xlabel(r'$\ell$',size=25)
 plt.ylabel(r'$\ell C_{\ell}^{\kappa g}$',size=25)
 plt.tight_layout()
-plt.savefig('plots/cleft/'+name+'/clkg.png')
+plt.savefig('plots/'+name+'/clkg.png')
 
 #print(5/0)
 
@@ -194,31 +199,31 @@ gdplot.triangle_plot([gd_sample], ['sigma8','Omegam','b1'],markers={'sigma8': 0.
 #	markers={'sigma8': 0.937, 'Omegam': 0.359, 'b1': 0.706, 'b2': -0.149, 'alpha_cross': 0.880, 'alpha_auto': -26.045, 'alpha_matter': -20.480})
 
 
-plt.savefig('plots/cleft/'+name+'/contours.png')
+plt.savefig('plots/'+name+'/contours.png')
 
 
-os.system('mkdir plots/cleft/'+name+'/trace')
+os.system('mkdir plots/'+name+'/trace')
 
 plt.figure()
 plt.plot(chains.sigma8)
-plt.savefig('plots/cleft/'+name+'/trace/sigma8.png')
+plt.savefig('plots/'+name+'/trace/sigma8.png')
 
 plt.figure()
 plt.plot(chains.As)
-plt.savefig('plots/cleft/'+name+'/trace/As.png')
+plt.savefig('plots/'+name+'/trace/As.png')
 
 plt.figure()
 plt.plot(chains.Omegam)
-plt.savefig('plots/cleft/'+name+'/trace/Omegam.png')
+plt.savefig('plots/'+name+'/trace/Omegam.png')
 
 plt.figure()
 plt.plot(chains.b1)
-plt.savefig('plots/cleft/'+name+'/trace/b1.png')
+plt.savefig('plots/'+name+'/trace/b1.png')
 
 
 plt.figure()
 plt.plot(logpost)
-plt.savefig('plots/cleft/'+name+'/trace/logpost.png')
+plt.savefig('plots/'+name+'/trace/logpost.png')
 
 tests = gd_sample.getConvergeTests(test_confidence=0.95,
 	writeDataToFile=True,
@@ -230,6 +235,6 @@ gdplot.triangle_plot([gd_sample], ['sigma8','Omegam'],markers={'sigma8': 0.8287,
 #	markers={'sigma8': 0.937, 'Omegam': 0.359, 'b1': 0.706, 'b2': -0.149, 'alpha_cross': 0.880, 'alpha_auto': -26.045, 'alpha_matter': -20.480})
 
 
-plt.savefig('plots/cleft/'+name+'/contours_sig8_Om.png')
+plt.savefig('plots/'+name+'/contours_sig8_Om.png')
 
 gd_sample.addDerived(gd_sample.getParams().sigma8 * gd_sample.getParams().Omegam**0.5 , name='S8', label='S8')
