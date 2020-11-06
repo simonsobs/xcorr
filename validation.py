@@ -10,6 +10,7 @@ import numpy as np
 import os
 from settings import *
 from cobaya.model import get_model
+import glob
 
 info['params']['omch2'] = "lambda H0,ombh2,tau,mnu,nnu,num_massive_neutrinos,ns,SN,As,Omegam,b1: Omegam * (H0/100.)**2. - ombh2 - (mnu/93.14)"
 info['params']['sigma8'] = {'derived': True, 'latex': r'\sigma_8'}
@@ -35,8 +36,15 @@ chains = gd_sample.getParams()
 
 #chains = gd_sample.getParams()
 
-logpost = np.loadtxt(output_name + '.1.txt')[:,1]
-logpost = logpost[int(0.5*len(logpost)):]
+chain_files = glob.glob(output_name + '.*.txt')
+logpost = np.zeros_like(chains.logA)
+cnter = 0
+
+for i in range(len(chain_files)):
+	logpost_ind = np.loadtxt(output_name + '.%i.txt' % (i+1))[:,1]
+	logpost_ind = logpost_ind[int(0.5*len(logpost_ind)):]
+	logpost[cnter:cnter+len(logpost_ind)] = logpost_ind
+	cnter += len(logpost_ind)
 
 #gd_sample.filter(np.abs(chains.b2) < 1)
 
