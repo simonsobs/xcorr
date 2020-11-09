@@ -52,48 +52,50 @@ for i in range(len(chain_files)):
 chains = gd_sample.getParams()
 #logpost = 0.5*(chains.chi2)+chains.minuslogprior
 
-print("%12s %12s" % ('Parameter','Mean'))
+f = open(name + '_posterior_summary.txt','w')
+
+f.write("%12s %12s" % ('Parameter','Mean') + '\n')
 for i in range(len(names)):
 	if names[i] != 'SN' and names[i] != 'As':
-		print('%12s %12.4f' % (names[i], mean[i]))
+		f.write('%12s %12.4f' % (names[i], mean[i]) + '\n')
 	else:
-		print('%12s %12.4e' % (names[i], mean[i]))
+		f.write('%12s %12.4e' % (names[i], mean[i]) + '\n')
 		
 map = np.argmin(logpost)
 
 names = ['logA','As','Omegam','sigma8','b1']
 
-print('')
-print('MAP')
-#print('%12s %12s' % ('logpost','chi2'))
-#print('%12.4f %12.4f' % (logpost[map],chains.chi2[map]))
-print("%12s %12s" % ('Parameter','MAP'))
+f.write('\n')
+f.write('MAP' + '\n')
+#f.write('%12s %12s' % ('logpost','chi2'))
+#f.write('%12.4f %12.4f' % (logpost[map],chains.chi2[map]))
+f.write("%12s %12s" % ('Parameter','MAP') + '\n')
 for i in range(len(names)):
 	exec('value = chains.' + names[i] + '[' + str(map) + ']')
 	if names[i] != 'SN' and names[i] != 'As':
-		print('%12s %12.4f' % (names[i], value))
+		f.write('%12s %12.4f' % (names[i], value)  + '\n')
 	else:
-		print('%12s %12.4e' % (names[i], value))
-print('%12s %12.4f' % ('logpost',logpost[map]))
-print('%12s %12.4f' % ('chi2',chains.chi2[map]))
+		f.write('%12s %12.4e' % (names[i], value)  + '\n')
+f.write('%12s %12.4f' % ('logpost',logpost[map])  + '\n')
+f.write('%12s %12.4f' % ('chi2',chains.chi2[map])  + '\n')
 
 ml = np.argmin(chains.chi2)
 
-print('')
-print('ML')
-print("%12s %12s" % ('Parameter','ML'))
+f.write('')
+f.write('ML\n')
+f.write("%12s %12s" % ('Parameter','ML')  + '\n')
 for i in range(len(names)):
 	exec('value = chains.' + names[i] + '[' + str(ml) + ']')
 	if names[i] != 'SN' and names[i] != 'As':
-		print('%12s %12.4f' % (names[i], value))
+		f.write('%12s %12.4f' % (names[i], value) + '\n')
 	else:
-		print('%12s %12.4e' % (names[i], value))
-print('%12s %12.4f' % ('logpost',logpost[ml]))
-print('%12s %12.4f' % ('chi2',chains.chi2[ml]))
+		f.write('%12s %12.4e' % (names[i], value) + '\n')
+f.write('%12s %12.4f' % ('logpost',logpost[ml]) + '\n')
+f.write('%12s %12.4f' % ('chi2',chains.chi2[ml]) + '\n')
 
 
-print('')
-print("%12s %12s %12s %12s %12s %12s %12s" % ('Parameter','2.5%','16%','50%','84%','97.5%','1-sigma'))
+f.write('\n')
+f.write("%12s %12s %12s %12s %12s %12s %12s" % ('Parameter','2.5%','16%','50%','84%','97.5%','1-sigma') + '\n')
 for i in range(len(names)):
 	exec('lower = gd_sample.confidence(chains.' + names[i] + ',0.025,upper=False)')
 	exec('lower2 = gd_sample.confidence(chains.' + names[i] + ',0.16,upper=False)')
@@ -102,9 +104,9 @@ for i in range(len(names)):
 	exec('upper = gd_sample.confidence(chains.' + names[i] + ',0.025,upper=True)')
 	one_sig = 0.25 * (upper-lower)
 	if names[i] != 'SN' and names[i] != 'As':
-		print('%12s %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f' % (names[i], lower, lower2, median, upper2, upper, one_sig))
+		f.write('%12s %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f' % (names[i], lower, lower2, median, upper2, upper, one_sig) + '\n')
 	else:
-		print('%12s %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e' % (names[i], lower, lower2, median, upper2, upper, one_sig))
+		f.write('%12s %12.4e %12.4e %12.4e %12.4e %12.4e %12.4e' % (names[i], lower, lower2, median, upper2, upper, one_sig) + '\n')
 		
 #model = get_model(info)
 #x = [chains.logA[map], chains.Omegam[map], chains.logSN[map], chains.b1[map], chains.b2[map], chains.alpha_cross[map]]
@@ -123,7 +125,7 @@ x = [chains.logA[map], chains.Omegam[map], chains.b1[map]]
 #x = [chains.logA[ml], chains.Omegam[ml], chains.logSN[ml], chains.b1[ml], chains.b2[ml], chains.alpha_cross[ml], chains.shift[ml], chains.width[ml]]
 
 like = model.loglike({'logA': x[0], 'Omegam': x[1], 'b1': x[2]})
-#print(5/0)
+#f.write(5/0)
 pars =  model.likelihood.theory.camb.CAMBparams()
 pars.set_cosmology(H0=model.likelihood.theory.get_param('H0'),
 	ombh2=model.likelihood.theory.get_param('ombh2'),
@@ -150,7 +152,7 @@ lim_bin_cross = bin(all_ell,lim_cross,lmin[low_ind_kg:high_ind],lmax[low_ind_kg:
 # Correct for namaster binning
 #lim_bin_cross = lim_bin #* clkg_corr[low_ind:high_ind]
 
-#print('lim_auto immediately before bin',lim_auto)
+#f.write('lim_auto immediately before bin',lim_auto)
 
 lim_bin_auto = bin(all_ell,lim_auto,lmin[low_ind_gg:high_ind],lmax[low_ind_gg:high_ind]) + info['params']['SN']
 
@@ -196,7 +198,7 @@ plt.ylabel(r'$\ell C_{\ell}^{\kappa g}$',size=25)
 plt.tight_layout()
 plt.savefig('plots/'+name+'/clkg.png')
 
-#print(5/0)
+#f.write(5/0)
 
 
 import getdist.plots as gdplt
@@ -246,3 +248,4 @@ gdplot.triangle_plot([gd_sample], ['sigma8','Omegam'],markers={'sigma8': 0.8287,
 plt.savefig('plots/'+name+'/contours_sig8_Om.png')
 
 gd_sample.addDerived(gd_sample.getParams().sigma8 * gd_sample.getParams().Omegam**0.5 , name='S8', label='S8')
+f.close()

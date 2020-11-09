@@ -1,0 +1,61 @@
+As:
+  latex: A_\mathrm{s}
+  value: 'lambda logA: 1e-10*np.exp(logA)'
+H0: 67.7
+Omegam:
+  drop: true
+  latex: \Omega_m
+  prior:
+    max: 0.9
+    min: 0.1
+  proposal: 0.03
+  ref: 0.3092002474326078
+SN: 0.0000001
+b1:
+  latex: b1
+  prior:
+    max: 10.0
+    min: -10.0
+  proposal: 0.05
+  ref: 2.17
+logA:
+  drop: true
+  latex: \log(10^{10} A_\mathrm{s})
+  prior:
+    max: 4.0
+    min: 1.0
+  proposal: 0.01
+  ref: 3.05
+mnu: 0.0
+nnu: 3.046
+ns: 0.96824
+num_massive_neutrinos: 0
+ombh2: 0.02247
+omch2: 'lambda ombh2,H0,tau,mnu,nnu,num_massive_neutrinos,ns,As,Omegam,b1:
+  Omegam * (H0/100.)**2. - ombh2 - (mnu/93.14)'
+s_wise:
+  latex: s
+  prior:
+    dist: norm
+    loc: 0.653
+    scale: 0.06530000000000001
+  proposal: 0.06530000000000001
+  ref: 0.653
+shift:
+  latex: shift
+  prior:
+    max: 1.0
+    min: -1.0
+  proposal: 0.1
+  ref: 9.55175950643363e-07
+sigma8:
+  derived: true
+  latex: \sigma_8
+tau: 0.0925
+width:
+  latex: width
+  prior:
+    max: 10.0
+    min: 0.0
+  proposal: 0.1
+  ref: 1.000002231966804
