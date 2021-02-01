@@ -26,7 +26,7 @@ import limber2_halofit as L2
 cleft = False
 if cleft:
 	import limber2_cleft as L2_cleft
-	from LPT.cleft_fftw import CLEFT
+	from velocileptors.LPT.cleft_fftw import CLEFT
 	
 # Turn off dn/dz uncertainty
 dndz_uncertainty = False
