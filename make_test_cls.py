@@ -47,8 +47,6 @@ np.random.seed(123+rank)
 #products = run(info)
 
 info['sampler'] = 'evaluate'
-params_yaml = yaml.load(open('input/params.yaml','r'))
-#info['params'] = params_yaml
 print(info['params'])
 
 import time
@@ -64,7 +62,6 @@ t0 = time.time()
 like = model.loglike({'logA': logA_for_test, 'Omegam': Omegam_for_test, 'b1': b1_for_test})
 print(time.time()-t0)
 
-#print(5/0)
 pars =  model.likelihood.theory.camb.CAMBparams()
 pars.set_cosmology(H0=model.likelihood.theory.get_param('H0'),
 	ombh2=model.likelihood.theory.get_param('ombh2'),
