@@ -154,7 +154,7 @@ lim_bin_cross = bin(all_ell,lim_cross,lmin[low_ind_kg:high_ind],lmax[low_ind_kg:
 
 #f.write('lim_auto immediately before bin',lim_auto)
 
-lim_bin_auto = bin(all_ell,lim_auto,lmin[low_ind_gg:high_ind],lmax[low_ind_gg:high_ind]) + info['params']['SN']
+lim_bin_auto = bin(all_ell,lim_auto,lmin[low_ind_gg:high_ind],lmax[low_ind_gg:high_ind])
 
 plt.figure()
 plt.errorbar(data_auto[0,low_ind_gg:high_ind],1e5*data_auto[1,low_ind_gg:high_ind],1e5*data_auto[2,low_ind_gg:high_ind])
@@ -165,7 +165,7 @@ plt.errorbar(data_auto[0,low_ind_gg:high_ind],1e5*data_auto[1,low_ind_gg:high_in
 #lim_bin_cross = np.loadtxt('clkg.txt')
 
 plt.plot(0.5*(lmin[low_ind_gg:high_ind]+lmax[low_ind_gg:high_ind]),1e5*lim_bin_auto,color='r',linestyle='--',label='MAP binned')
-plt.plot(all_ell,1e5*(lim_auto+info['params']['SN']),color='r',label='MAP')
+plt.plot(all_ell,1e5*(lim_auto),color='r',label='MAP')
 
 plt.xlim(0,600)
 
