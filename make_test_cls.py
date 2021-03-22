@@ -47,6 +47,8 @@ np.random.seed(123+rank)
 #products = run(info)
 
 info['sampler'] = 'evaluate'
+#params_yaml = yaml.load(open('input/params.yaml','r'))
+#info['params'] = params_yaml
 print(info['params'])
 
 import time
@@ -62,6 +64,7 @@ t0 = time.time()
 like = model.loglike({'logA': logA_for_test, 'Omegam': Omegam_for_test, 'b1': b1_for_test})
 print(time.time()-t0)
 
+#print(5/0)
 pars =  model.likelihood.theory.camb.CAMBparams()
 pars.set_cosmology(H0=model.likelihood.theory.get_param('H0'),
 	ombh2=model.likelihood.theory.get_param('ombh2'),
@@ -105,9 +108,9 @@ lim_bin_auto = bin(all_ell,lim_auto,lmin[:high_ind],lmax[:high_ind])
 
 np.savetxt('input/clkg_unbinned.txt',np.array([all_ell,lim_cross]).T)
 np.savetxt('input/clkk_unbinned.txt',np.array([all_ell,lim_clkk]).T)
-np.savetxt('input/clgg_unbinned.txt',np.array([all_ell,lim_auto + info['params']['SN']]).T)
+np.savetxt('input/clgg_unbinned.txt',np.array([all_ell,lim_auto]).T)
 
 cl_input = np.loadtxt('/global/cscratch1/sd/akrolew/unwise-hod/8192-5000/HOD16/QA_Cl/GREEN/clkg_binned_dl50_noiseless_for_chains.txt')
 
-np.savetxt('input/clgg.txt',np.array([cl_input[0,:high_ind],lim_bin_auto + np.random.normal(loc=0,scale=0.1 * lim_bin_auto),0.1*lim_bin_auto]))
-np.savetxt('input/clkg.txt',np.array([cl_input[0,:high_ind],lim_bin_cross + np.random.normal(loc=0,scale=0.1 * lim_bin_cross),0.1*lim_bin_cross]))
+np.savetxt('input/clgg.txt',np.array([cl_input[0,:high_ind],lim_bin_auto + np.random.normal(loc=0,scale=0.0001 * lim_bin_auto),0.1*lim_bin_auto]))
+np.savetxt('input/clkg.txt',np.array([cl_input[0,:high_ind],lim_bin_cross + np.random.normal(loc=0,scale=0.0001 * lim_bin_cross),0.1*lim_bin_cross]))

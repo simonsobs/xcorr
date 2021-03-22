@@ -63,3 +63,6 @@ b1_for_test = 1.0
 t0 = time.time()
 like = model.loglike({'logA': logA_for_test, 'Omegam': Omegam_for_test, 'b1': b1_for_test})
 print(time.time()-t0)
+
+
+like = model.loglike({'logA': 3.28, 'Omegam': 0.3016, 'b1':0.8367})

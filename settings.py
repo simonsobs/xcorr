@@ -722,14 +722,14 @@ info = {
             'latex': '\Omega_m',
             'proposal': Omegam_ref_sigma,
             'drop': True},
-        'logSN': {
-           'prior': {'dist': 'norm',
-              'loc': -7.,
-              'scale': logSN_prior_sigma},
-              'ref': -7.,
-              'proposal': logSN_ref_sigma,
-              'drop': True},
-        'SN': {'value': 'lambda logSN: 10**logSN',
+        #'logSN': {
+        #   'prior': {'dist': 'norm',
+        #      'loc': -7.,
+        #      'scale': logSN_prior_sigma},
+        #      'ref': -7.,
+        #      'proposal': logSN_ref_sigma,
+        #      'drop': True},
+        'SN': {'value': 1e-7,
                'latex': 'SN'},
         #'As': {
         #    'prior': {'min': 0.1e-9, 'max': 5.0e-9},
