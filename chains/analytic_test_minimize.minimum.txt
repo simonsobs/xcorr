@@ -1,0 +1,2 @@
+#weight  minuslogpost      logA     Omegam          b1            As      omch2    sigma8  minuslogprior  minuslogprior__0      chi2  chi2__clkg_likelihood
+      1     8552.2527 3.9999997 0.51097627 0.088367395 5.4598135e-09 0.22587837 1.8661345      3.1780538         3.1780538 17098.149              17098.149

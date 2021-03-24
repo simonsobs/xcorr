@@ -1,0 +1,20 @@
+ -log(Like) = 8552.252684555795
+  chi-sq    = 17104.50536911159
+
+    9  3.999999730e+00   logA                    \log(10^{10} A_\mathrm{s})
+   11  5.109762679e-01   Omegam                  \Omega_m
+   12  8.836739452e-02   b1                      b1
+
+    1  70.0              H0                      H0
+    2  2.450000000e-02   ombh2                   ombh2
+    3  0.05              tau                     tau
+    4  0.0               mnu                     mnu
+    5  3.046             nnu                     nnu
+    6  0                 num_massive_neutrinos   num\ massive\ neutrinos
+    7  0.965             ns                      ns
+    8  1e-07             SN                      SN
+
+   10  5.459813530e-09   As                      A_\mathrm{s}
+   13  2.258783713e-01   omch2                   omch2
+   14  1.866134491e+00   sigma8                  \sigma_8
+   15  1.709814926e+04   chi2__clkg_likelihood   \chi^2_{\rm clkg\ likelihood}

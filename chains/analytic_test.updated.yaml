@@ -41,7 +41,7 @@ theory:
     use_planck_names: false
 likelihood:
   clkg_likelihood:
-    external: import_module('settings').clkg_likelihood
+    external: true
     input_params:
     - SN
     - b1
@@ -49,15 +49,55 @@ likelihood:
     speed: 125.0
     stop_at_error: false
 sampler:
-  minimize:
-    confidence_for_unbounded: 0.9999995
-    ignore_prior: false
-    max_evals: 1000000.0
-    method: scipy
-    override_bobyqa:
-      rhoend: 0.05
-    override_scipy:
-      method: Nelder-Mead
+  mcmc:
+    Rminus1_cl_level: 0.95
+    Rminus1_cl_stop: 0.2
+    Rminus1_last: .inf
+    Rminus1_single_split: 4
+    Rminus1_stop: 0.05
+    blocking:
+    - - 1.0
+      - - logA
+        - Omegam
+    - - 5.0
+      - - b1
+    blocks: null
+    burn_in: 100d
+    callback_every: null
+    callback_function: null
+    check_every: 40d
+    converged: null
+    covmat:
+    - - 0.09976681603676474
+      - -0.005314374750023212
+      - -0.00827336762389684
+    - - -0.005314374750023232
+      - 0.0016841304121635943
+      - 0.00022682366691092397
+    - - -0.008273367623896837
+      - 0.0002268236669109221
+      - 0.0007254730118275879
+    covmat_params:
+    - true
+    - true
+    - true
+    drag: false
+    drag_limits:
+    - 1
+    - 10
+    i_last_slow_block: null
+    learn_proposal: true
+    learn_proposal_Rminus1_max: 10
+    learn_proposal_Rminus1_max_early: 30.0
+    learn_proposal_Rminus1_min: 0.0
+    max_samples: .inf
+    max_tries: 100d
+    mpi_size: null
+    output_every: 20
+    oversample: true
+    oversampling_factors: null
+    proposal_scale: 1.0
+    seed: null
 params:
   H0:
     value: 70.0
@@ -81,7 +121,7 @@ params:
     prior:
       min: 1.0
       max: 4.0
-    ref: 3.05
+    ref: 4.241438612318939
     proposal: 0.1
     latex: \log(10^{10} A_\mathrm{s})
     drop: true
@@ -93,7 +133,7 @@ params:
     prior:
       min: 0.1
       max: 0.9
-    ref: 0.3
+    ref: 0.47166073055381197
     proposal: 0.01
     latex: \Omega_m
     drop: true
@@ -101,7 +141,7 @@ params:
     prior:
       min: 0.0
       max: 10.0
-    ref: 1.0
+    ref: 0.07292153203526754
     proposal: 0.1
     latex: b1
   omch2:
@@ -114,6 +154,7 @@ params:
     derived: true
     latex: \sigma_8
 modules: /global/cfs/cdirs/m3058/krolewski/cosmo_modules/
-output: analytic_test_minimize
+output: analytic_test
 timing: true
 resume: true
+force: false
