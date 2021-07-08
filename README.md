@@ -59,3 +59,9 @@ conda install -c conda-forge healpy
 
 * From the xcorr directory, run: `python compute_cls.py --path2config path/to/your/favorite/config.yaml`
 * Config file example: `configs/cls-dgdg-curved.yaml`
+
+## Main contributors (in alphabetical order):
+* Simone Ferraro (LBNL)
+* Alex Krolewski (Waterloo/PI)
+* Andrina Nicola (Princeton)
+* Emmanuel Schaan (LBNL)
